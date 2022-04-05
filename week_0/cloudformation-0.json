@@ -1,0 +1,105 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "AWS CloudFormation Simple Template.",
+    "Parameters":
+    {
+        "KeyName":
+        {
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+        },
+        "ImageId":
+        {
+            "Description": "EC2 image Id",
+            "Type": "String",
+            "Default": "ami-00ee4df451840fa9d",
+            "MinLength": "20",
+            "MaxLength": "25",
+            "AllowedPattern" : "[ami-][a-zA-Z0-9]*",
+            "ConstraintDescription": "must be a valid EC2 image id."
+        },
+        "InstanceType":
+        {
+            "Description": "WebServer EC2 instance type",
+            "Type": "String",
+            "Default": "t2.micro",
+            "AllowedValues":
+            [
+                "t2.nano",
+                "t2.micro",
+                "t2.small"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        },
+        "TestInputParam":
+        {
+            "Description": "Test input parameter",
+            "Type": "String",
+            "MaxLength": "50",
+            "ConstraintDescription": "must be a string not longer then 50 symbols."
+        }
+    },
+    "Resources":
+    {
+        "EC2Instance":
+        {
+            "Type": "AWS::EC2::Instance",
+            "Properties":
+            {
+                "InstanceType":
+                {
+                    "Ref": "InstanceType"
+                },
+                "KeyName":
+                {
+                    "Ref": "KeyName"
+                },
+                "ImageId":
+                {
+                    "Ref": "ImageId"
+                }
+            }
+        }
+    },
+    "Outputs":
+    {
+        "InstanceId":
+        {
+            "Description": "InstanceId of the newly created EC2 instance",
+            "Value":
+            {
+                "Ref": "EC2Instance"
+            }
+        },
+        "PublicIP":
+        {
+            "Description": "Public IP address of the newly created EC2 instance",
+            "Value":
+            {
+                "Fn::GetAtt":
+                [
+                    "EC2Instance",
+                    "PublicIp"
+                ]
+            }
+        },
+        "TestOutput":
+        {
+            "Description": "Test output based on test input",
+            "Value":
+            {
+                "Fn::Join":
+                [
+                    "",
+                    [
+                        "Hello, ",
+                        {
+                            "Ref": "TestInputParam"
+                        }
+                    ]
+                ]
+            }
+        }
+    }
+}
