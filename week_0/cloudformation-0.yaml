@@ -13,7 +13,7 @@ Parameters:
     Default: ami-00ee4df451840fa9d
     MinLength: 20
     MaxLength: 25
-    AllowedPattern: "[ami-][a-zA-Z0-9]*"
+    AllowedPattern: "ami-[a-zA-Z0-9]*"
     ConstraintDescription: must be a valid EC2 image id.
   InstanceType:
     Description: WebServer EC2 instance type
