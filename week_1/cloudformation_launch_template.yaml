@@ -1,0 +1,149 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: AWS CloudFormation ASG LaunchConfig Template.
+
+Parameters:
+  MaxSizeASG:
+    Description: Enter the Max Size for the ASG(2-5)
+    MinValue: 2
+    MaxValue: 5
+    Default: 5
+    Type: Number
+    ConstraintDescription: must be not less then 2 and not more then 5.
+  DesiredCapacityASG:
+    Description: Enter the desired capacity for the ASG(2-MaxSizeASG)
+    MinValue: 2
+    MaxValue: 5
+    Default: 2
+    Type: Number
+    ConstraintDescription: must be not less then 2 and not more then MaxSizeASG.
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  ImageId:
+    Description: EC2 image Id
+    Type: String
+    Default: ami-00ee4df451840fa9d
+    MinLength: 20
+    MaxLength: 25
+    AllowedPattern: "ami-[a-zA-Z0-9]*"
+    ConstraintDescription: must be a valid EC2 image id.
+  InstanceType:
+    Description: WebServer EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+    ConstraintDescription: must be a valid EC2 instance type.
+  VpcId:
+    Description: Vpc Id
+    Type: String
+    MinLength: 20
+    MaxLength: 25
+    Default: vpc-07ae32ff3b43cd04b
+    AllowedPattern: "vpc-[a-zA-Z0-9]*"
+    ConstraintDescription: must be a valid VPC id.
+  AvailabilityZone:
+    Description: Availability Zone
+    Type: String
+    Default: us-west-2a
+    AllowedValues:
+      - us-west-2a
+      - us-west-2b
+      - us-west-2c
+      - us-west-2d
+    ConstraintDescription: must be a valid Availability Zone.
+
+Resources:
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: Test Autoscaling Group
+      Cooldown: 120
+      DesiredCapacity:
+        Ref: DesiredCapacityASG
+      LaunchTemplate:
+        LaunchTemplateId:
+          Ref: LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MaxSize:
+        Ref: MaxSizeASG
+      MinSize: 2
+      AvailabilityZones: [ !Ref AvailabilityZone ]
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId:
+          Ref: ImageId
+        InstanceType:
+          Ref: InstanceType
+        KeyName:
+          Ref: KeyName
+        Monitoring:
+          Enabled: True
+        SecurityGroupIds:
+          - !GetAtt WebServerSecurityGroup.GroupId
+          - !GetAtt SshServerSecurityGroup.GroupId
+        UserData:
+          Fn::Base64:
+            !Sub |
+            #!/bin/bash -x
+            sudo yum update -y
+            sudo yum install java-1.8.0-openjdk -y
+      LaunchTemplateName: TestLaunchTemplate
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow Only http/https access"
+      GroupName: "Web access"
+      VpcId:
+        Ref: VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+  SshServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow Only ssh access"
+      GroupName: "SSH access"
+      VpcId:
+        Ref: VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  AutoscalingGroup:
+    Description: The newly created asg
+    Value:
+      Ref: AutoScalingGroup
+  LaunchTemplate:
+    Description: the newly created launch template
+    Value:
+      Ref: LaunchTemplate
