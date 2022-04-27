@@ -1,8 +1,7 @@
 #!/bin/bash
 
 file_name=data.txt
-default_bucket_name=my-bucket-$(date +%s)
-bucket_name=${1-$default_bucket_name}
+bucket_name=iam-ozinoviev-bucket
 acl=private
 region=us-west-2
 

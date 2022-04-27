@@ -25,12 +25,32 @@ java -version
 ### Week 2
 #### 1. S3 bucket
 1. Open regular console
-2. cd to the folder with init-s3.sh script
-3. run script with optional parameter(if not set then will be created s3 bucket with name my-bucket-[current timestamp])
+2. cd to the folder with `init-s3.sh` script
+3. run script(will be created s3 bucket with name iam-ozinoviev-bucket)
 ```shell
-./init-s3.sh <OPTIONAL_BUCKET_NAME>
+./init-s3.sh
 ```
 4. check that uploaded file is not publicly available. for example:
 ```shell
-curl --location --request GET 'https://<BUCKET_NAME>.s3.us-west-2.amazonaws.com/data.txt'
+curl --location --request GET 'https://iam-ozinoviev-bucket.s3.us-west-2.amazonaws.com/data.txt'
+```
+#### 2. Terraform
+1. Open regular console
+2. cd to the folder with `main.tf` script
+3. run script
+```shell
+terraform apply
+```
+4. check the file was download successfully:
+```shell
+ssh -i PATH_TO_YOUR_KEY ec2-user@PUBLIC_DNS_ADDRESS_OF_EC2_INSTANCE
+```
+then in the container console:
+```shell
+nano data.txt
+```
+the content should be `This is the test data`
+5. for cleanup resources run:
+```shell
+terraform destroy
 ```
