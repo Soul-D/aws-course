@@ -54,3 +54,37 @@ the content should be `This is the test data`
 ```shell
 terraform destroy
 ```
+
+### Week 3
+#### Databases: RDS, Dynamo DB
+1. Open regular console
+2. Change dir to `week_3`
+3. Run script
+```shell
+./init-s3.sh
+```
+4. Change dir to `terraform`
+5. Run
+```shell
+terraform init
+terraform apply
+```
+6. Run the following command:
+```shell
+ssh -i PATH_TO_YOUR_KEY ec2-user@INSTANCE_PUBLIC_IP_FROM_OUTPUT
+```
+7. Inside container:
+```shell
+cd /tmp
+chmod +x dynamodb-script.sh
+./dynamodb-script.sh
+
+#postgres_connection_host, postgres_connection_port << from output
+#db_username, db_password << from your secrets
+psql -h postgres_connection_host -p postgres_connection_port -d test_database -U username -f rds-script.sql
+exit
+```
+8. Cleanup:
+```shell
+terraform destroy
+```
