@@ -88,3 +88,21 @@ exit
 ```shell
 terraform destroy
 ```
+
+### Week 4
+#### VPC
+1. Open regular console
+2. Change dir to `week_4/terraform`
+3. Run
+```shell
+terraform init
+terraform apply
+```
+4. check that load balancer routes requests to different ec2 instances(should be different output):
+```shell
+curl --location --request GET '<LOAD_BALANCER_DNS_ADDRESS_FROM_OUTPUT>'
+```
+5. Cleanup:
+```shell
+terraform destroy
+```
