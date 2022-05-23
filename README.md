@@ -106,3 +106,27 @@ curl --location --request GET '<LOAD_BALANCER_DNS_ADDRESS_FROM_OUTPUT>'
 ```shell
 terraform destroy
 ```
+
+### Week 5
+#### SQS and SNS
+1. Open regular console
+2. Change dir to `week_5/terraform`
+3. Run
+```shell
+terraform init
+terraform apply
+```
+4. Go to AWS console UI and setup subscription for SNS.
+5. Check that all is work as expected:
+```shell
+#SNS
+aws sns publish --topic <sns_topic_arn_from_output> --message 'Simple notification message' --region us-west-2
+
+#SQS
+aws sqs send-message --queue-url <sqs_queue_url_from_output> --message-body 'Simple queue message' --region us-west-2
+aws sqs receive-message --queue-url <sqs_queue_url_from_output> --region us-west-2
+```
+6Cleanup:
+```shell
+terraform destroy
+```
