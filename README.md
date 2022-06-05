@@ -126,7 +126,49 @@ aws sns publish --topic <sns_topic_arn_from_output> --message 'Simple notificati
 aws sqs send-message --queue-url <sqs_queue_url_from_output> --message-body 'Simple queue message' --region us-west-2
 aws sqs receive-message --queue-url <sqs_queue_url_from_output> --region us-west-2
 ```
-6Cleanup:
+6. Cleanup:
+```shell
+terraform destroy
+```
+
+### Week 6
+#### Final
+1. Open regular console
+2. Change dir to `final/terraform`
+3. Run
+```shell
+terraform init
+terraform apply
+```
+4. Go to AWS console UI and setup subscription for SNS.
+5. Check that all is work as expected:
+   * Change dir to `final/jars`
+   * Run local application:
+   ```shell
+    java -cp calc-client-1.0-SNAPSHOT-jar-with-dependencies.jar CalcClient <load-balancer-link>
+    ```
+   * Go to AWS console UI and terminate one of public instances. 
+   After some time ASG will recreate EC2 instance and it should automatically load balanced by ELB
+   * Go to AWS console UI and pick up public DNS address of public instance.
+   * Connect to public instance via SSH
+   ```shell
+   ssh -i PATH_TO_YOUR_KEY ec2-user@INSTANCE_PUBLIC_DNS_ADDRESS
+    ```
+   * Check the content of `edu-lohika-training-aws-dynamodb` table in `dynamo db`:
+    ```shell
+    aws dynamodb scan --table-name edu-lohika-training-aws-dynamodb --region us-west-2
+    ```
+   * Go to AWS console UI and pick up private IP address of private instance.
+   * Connect from public instance to private instance via SSH
+   ```shell
+   ssh ec2-user@INSTANCE_PRIVATE_IP_ADDRESS
+    ```
+   * Check the content of `LOGS` table in `postgress`:
+   ```shell
+    cd /
+    psql -h <rds_link> -p 5432 -d EduLohikaTrainingAwsRds -U rootuser -a -f select_logs.sql
+    ```
+6. Cleanup:
 ```shell
 terraform destroy
 ```
